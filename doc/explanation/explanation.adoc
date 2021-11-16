@@ -1,0 +1,71 @@
+= Explanation
+
+This document will take a very wide view on the project to discuss broad parts of the code.
+You will learn what Sirius Components is, how it is built, why it behaves the way it does and the philosophy behind some technical choices made in the project.
+
+== History
+
+=== Eclipse Sirius
+
+Eclipse Sirius is a project of the Eclipse Foundation created by Obeo and Thales when the core technology of Obeo Designer has been made open source in the Eclipse Foundation in 2013.
+Eclipse Sirius is a product based on Eclipse RCP used to build a graphical modeling workbench dedicated to a specific domain to help design complex systems.
+It is built around the core concept of representation.
+A representation is a projection created from semantic data and a representation description which are used to parameterize the projection.
+Eclipse Sirius users can easily create their own representation descriptions to define how their representations will behave.
+It allows them to describe how their concepts will appear in diagrams, forms, tables and trees, the tools used to interact with them and their validation rules for example.
+
+=== Obeo Studio and Sirius Web
+
+A couple years ago, Obeo started the Obeo Cloud Platform initiative with Obeo Studio in order to bring the ability to manipulate graphical representations in web browsers.
+In 2020, Obeo decided to release in open source the core technology behind Obeo Studio with two projects: Sirius Web and Sirius Components.
+Sirius Components is an open source framework to allow anyone to create applications based on our graphical modeling workbench approach.
+On the other hand, Sirius Web aims to be a simple open source web application built on top of Sirius Components to give end users a ready-to-use product.
+
+=== Sirius Components
+
+Sirius Components was born as a part of Obeo Studio and Sirius Web.
+It is a graphical modeling framework used to build applications where users can collaborate on graphical representations such as diagrams or forms in real time.
+
+As a result, it started with a lot of strong technical constraint from those two environments and over time, we made it more generic.
+A sizable amount of code has thus been migrated from Sirius Components to Sirius Web to keep in Sirius Components the generic parts of the framework.
+For example, all the code related to the persistence layer (which was specific to PostgreSQL) has been moved to Sirius Web and Sirius Components does not have any opinion anymore on the way data are persisted.
+
+
+== Goals
+
+=== Design
+
+Immutable data structure, separation of code and data
+Composition as the source of abstraction instead of inheritance
+
+
+=== Representation
+
+Sirius Desktop representations vs Sirius Components representations
+Elements
+Props
+Components
+Fragments
+BaseRenderer
+
+The rendering logic can always be expressed as React component pseudo-code
+
+
+=== Lifecycle
+
+representations synchronized with the data
+no constraints on the data
+usable in applications based on spring boot
+some parts usable as regular java libraries (for example the representations)
+compatibility layer for sirius desktop
+compatibility layer for emf
+
+we will make them more optional
+
+Sink, Flux, Mono
+Event Processor
+
+=== EMF Compatibility
+
+
+=== Sirius Desktop Compatibility

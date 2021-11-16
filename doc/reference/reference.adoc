@@ -1,0 +1,12 @@
+= Reference
+
+== Technologies
+
+- Java, Spring Boot GraphQL Java, EMF, Sirius Desktop, AQL
+- TypeScript, React, MaterialUI, XState, Apollo GraphQL
+
+== Technical Components
+
+== Architecture
+
+=== Backend
