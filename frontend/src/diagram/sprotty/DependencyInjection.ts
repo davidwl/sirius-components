@@ -50,7 +50,6 @@ import {
   overrideCommandStackOptions,
   overrideViewerOptions,
   PreRenderedView,
-  routingModule,
   SCompartmentView,
   SEdge,
   selectModule,
@@ -65,6 +64,7 @@ import {
   zorderModule,
 } from 'sprotty';
 import { Action, Point, RequestPopupModelAction, SetPopupModelAction, UpdateModelAction } from 'sprotty-protocol';
+import { siriusRoutingModule } from './routing/siriusRoutingModule';
 
 /**
  * Extends Sprotty's SLabel to add support for having the initial text when entering
@@ -159,7 +159,7 @@ export const createDependencyInjectionContainer = (containerId: string, getCurso
     graphModule,
     updateModule,
     modelSourceModule,
-    routingModule,
+    siriusRoutingModule,
     edgeEditModule,
     edgeLayoutModule,
     zorderModule,
