@@ -63,6 +63,11 @@ export class ListItemNodeStyle implements INodeStyle {
   backgroundColor: string;
 }
 
+export interface Ratio {
+  x: number;
+  y: number;
+}
+
 export class Edge extends SEdge implements WithEditableLabel {
   editableLabel?: EditableLabel & Label;
   descriptionId: string;
@@ -71,6 +76,8 @@ export class Edge extends SEdge implements WithEditableLabel {
   targetObjectId: string;
   targetObjectKind: string;
   targetObjectLabel: string;
+  sourceAnchorRelativePosition: Ratio;
+  targetAnchorRelativePosition: Ratio;
 }
 
 export class EdgeStyle {

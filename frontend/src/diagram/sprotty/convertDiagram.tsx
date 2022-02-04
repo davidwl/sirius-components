@@ -272,8 +272,9 @@ const convertEdge = (diagram: Diagram, gqlEdge: GQLEdge, httpOrigin: string, rea
     centerLabel,
     endLabel,
     style,
+    sourceAnchorRelativePosition,
+    targetAnchorRelativePosition,
   } = gqlEdge;
-
   const convertedBeginLabel: Label | null = beginLabel ? convertLabel(beginLabel, httpOrigin, readOnly) : null;
   const convertedCenterLabel: Label | null = centerLabel ? convertLabel(centerLabel, httpOrigin, readOnly) : null;
   const convertedEndLabel: Label | null = endLabel ? convertLabel(endLabel, httpOrigin, readOnly) : null;
@@ -299,6 +300,8 @@ const convertEdge = (diagram: Diagram, gqlEdge: GQLEdge, httpOrigin: string, rea
   edge.targetObjectId = targetObjectId;
   edge.targetObjectKind = targetObjectKind;
   edge.targetObjectLabel = targetObjectLabel;
+  edge.sourceAnchorRelativePosition = sourceAnchorRelativePosition;
+  edge.targetAnchorRelativePosition = targetAnchorRelativePosition;
   edge.features = handleEdgeFeatures(readOnly);
 
   if (convertedBeginLabel) {
