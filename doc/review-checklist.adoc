@@ -1,0 +1,104 @@
+# Review checklist
+
+This document will contain a cheklist of the various things to consider while reviewing a contribution.
+
+## Issues
+
+### Labels
+
+Issues are quite simple to review, you should mostly consider if the appropriate labels have been added with at least a label for:
+
+- The area such as `area: backend`, `area: frontend`, `area: diagram` etc
+- The difficulty such as `difficulty: starter`
+- The type like `type: enhancement``
+
+Those various labels are important to find existing issues and also because we have from time to time some contributors available on the project for a couple of day or weeks and we need to find simple enhancements for them to perform.
+
+
+### Projects and milestones
+
+We are currently working on a single project and milestone at a time.
+If you know for a fact that your work will be part of the current iteration, you can add the current project and milestone to the project.
+
+
+### Linked pull requests
+
+If there are pull requests for this issue, you should link them here.
+Once the pull request will be merged, the issue will be closed.
+If some work remains to be done, it's best to open a new issue to indicate that a first part of the work has been merged and that some work remains to be done.
+
+
+## Pull requests
+
+### Commit
+
+All the commits of a pull request should be properly formatted.
+Commits should thus start with a title starting with the topic of the commit, either the number of an issue or a general purpose tag like `releng`, `[enh]`, `[cleanup]` etc.
+General purpose tags should only be used for small improvements.
+
+If such an improvement require some explanation or some additional context, then using a proper issue capturing those information is better.
+If some work is being done outside of a cool down, it pretty much always require a proper issue apart from the usual `[releng]` commits for the releases of Sirius Components.
+If you are referencing an issue, the URL of the issue should be specified too.
+
+We are using `Signed-off-by` at the end of each commit.
+It's not required anymore by the Eclipse Foundation and we may remove this requirement one day but that's what we are currently doing.
+
+
+### Documentation and changelog
+
+A commit fixing an issue should also update the `CHANGELOG` to indicate what has been done.
+For most contributions, a simple sentence with the link of the issue and it's description is enough.
+Important API breaks should also be noted in the dedicated sections.
+
+Major evolutions require a dedicated `ADR` which should be referenced in the `CHANGELOG` too.
+
+The code should also have a proper copyright which should be updated when necessary.
+
+
+### Backend
+
+Here is a list of things to consider while reviewing some backend changes:
+
+- [ ] Are there new depencencies? Are they really relevant?
+- [ ] Do the variables have a meaningful name?
+- [ ] If the commit includes or modified an event handler, a regular service class or anything related to the layout algorithm, then it should contain some tests
+- [ ] If an input, a payload or a datafetcher has been modified then the associated schema should be updated too (it works both ways)
+- [ ] Is `null` really an acceptable value of the constructor?
+- [ ] Are there non `final` fields and are they really necessary?
+- [ ] Does a data structure contain some behavior?
+- [ ] Is any data structure mutable? Is that necessary?
+- [ ] Is the dependency to EMF / Sirius RCP properly isolated?
+
+
+### Frontend
+
+Here is a list of things to consider while reviewing some frontend changes:
+
+- [ ] Are there new depencencies? Are they really relevant?
+- [ ] Do the variables have a meaningful name?
+- [ ] Is the code modified or the new code properly typed? This includes calls to Apollo or React hooks like `useState`, `useMachine` or `useMutation`. It also includes the return type of the functions.
+- [ ] Are there useless `null` or `undefined` checks? This includes unnecessary `?.` of course
+- [ ] Does it display errors from `useQuery`, `useMutation`, `useSubscription`, `useLazyQuery` to the end user?
+- [ ] Can the code be easily tested and if it can, is it?
+- [ ] Are types in a `.types.ts` file?
+- [ ] Do new files have the proper extension `ts` or `tsx`?
+- [ ] Does the code rely on the `function` keyword instead of an arrow function?
+
+
+### Integration
+
+When the code is good and the PR ready to be merged, you should first start by rebasing the PR on top of master in order to check that it is really working.
+There are some use cases in which a PR can be rebased without any conflict while still producing code that does not compile (for example a class has been moved on master and the PR needs to be updated because a newly created file references the old qualified name).
+
+The reviewer should consider if the PR needs to be squashed and he should do it if necessary.
+
+After that, the reviewer should use the `Rebase and merge` action to merge the PR and `Delete the branch` to clean the, now useless, branch.
+
+If the commit is necessary for another project, for example to merge some changes in Sirius Web, then a new release should be performed.
+Most of the time, the commit for the release should be added by the reviewer in the PR.
+This prevent the need for another reviewer to perform a review of a pull request containing only the commit for the release.
+For this commit, the bump version script should be used, for example: `./scripts/bump-version 2022.01.10`.
+Then a commit with the title `[releng] Bump version to 2022.01.10` should be contributed.
+
+Once the PR has been merged and the build is green on master, if a release is necessary then the commit of the release should be tagged using `git tag -a v2022.01.10 -m v2022.01.10` and `git push origin v2022.01.10`.
+Do not forget to tag the commit on the master branch and not on the pull request branch.
