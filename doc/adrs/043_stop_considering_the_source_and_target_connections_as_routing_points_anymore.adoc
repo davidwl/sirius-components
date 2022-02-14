@@ -1,0 +1,33 @@
+:imagesdir: images/043
+= ADR-043 - Stop considering the source and target connections as routing points anymore
+
+== Context
+
+We want to support the edition of routing points [#997](https://github.com/eclipse-sirius/sirius-components/issues/997). In matter of Routing points, we have a different approch than Sprotty's. We consider source and target connection points as routing points while Sprotty does not. Because of that difference we started to customize Sprotty routing computation a bit too much to not considering an alternative solution.
+
+We figured out that we needed to consider the source and target connection points as routing points only to compute the edge label position in our incremental layout engine. Because of that we also had to add source and target connection points in the layout computed by ELK.
+
+== Decision
+
+We will stop to consider source and target connection points as routing points.
+
+=== Backend
+
+We will keep the `EdgeRoutingPointsProvider` to handle self-loop edges.
+We will move the edge label position algorithm from the `EdgeRoutingPointsProvider` to `EdgeLabelPositionProvider`.
+Since we introduced edge anchor positions we will adapt the `ELKLayoutedDiagramProvider` to compute anchor position instead of the source and target routing points. 
+
+image:043_anchors_inferred_from_ELK.png[alt]
+
+=== Frontend
+
+Since we already customize the sprotty edge router to take account of our edge anchors in [#966](https://github.com/eclipse-sirius/sirius-components/issues/966) we will have to adapt that customization.
+
+== Status
+
+WIP
+
+== Consequences
+
+- Source and target anchors will be updated according to the ELK layout after the user has used the `Arrange all`.
+- This ADR invalidates `ADR 017 Improve edge source and target anchors`
