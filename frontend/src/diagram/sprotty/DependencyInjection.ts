@@ -64,6 +64,7 @@ import {
   zorderModule,
 } from 'sprotty';
 import { Action, Point, RequestPopupModelAction, SetPopupModelAction, UpdateModelAction } from 'sprotty-protocol';
+import { siriusCommonModule } from './common/siriusCommonModule';
 import { siriusRoutingModule } from './routing/siriusRoutingModule';
 
 /**
@@ -149,6 +150,7 @@ export const createDependencyInjectionContainer = (containerId: string, getCurso
   const container = new Container();
   container.load(
     defaultModule,
+    siriusCommonModule,
     boundsModule,
     selectModule,
     siriusDragAndDropModule,
