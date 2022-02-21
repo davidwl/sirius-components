@@ -80,6 +80,7 @@ import {
   getToolSectionsQuery,
   invokeEdgeToolOnDiagramMutation,
   invokeNodeToolOnDiagramMutation,
+  updateEdgeRoutingPointsOp,
   updateNodeBoundsOp,
   updateNodePositionOp,
 } from 'diagram/operations';
@@ -104,10 +105,15 @@ import {
 import { edgeCreationFeedback } from 'diagram/sprotty/edgeCreationFeedback';
 import { Toolbar } from 'diagram/Toolbar';
 import { atLeastOneCanInvokeEdgeTool, canInvokeTool } from 'diagram/toolServices';
+import {
+  GQLUpdateEdgeRoutingPointsData,
+  GQLUpdateEdgeRoutingPointsInput,
+  GQLUpdateEdgeRoutingPointsVariables,
+} from 'index';
 import React, { useCallback, useContext, useEffect, useRef } from 'react';
 import { SelectionDialogWebSocketContainer } from 'selection/SelectionDialogWebSocketContainer';
 import { EditLabelAction, HoverFeedbackAction, SEdge, SGraph, SModelElement, SNode } from 'sprotty';
-import { FitToScreenAction } from 'sprotty-protocol';
+import { FitToScreenAction, Point } from 'sprotty-protocol';
 import { v4 as uuid } from 'uuid';
 import { RepresentationComponentProps, Selection, SelectionEntry } from 'workbench/Workbench.types';
 
@@ -368,6 +374,10 @@ export const DiagramWebSocketContainer = ({
   ] = useMutation(updateNodeBoundsOp);
   const [arrangeAllMutation, { loading: arrangeAllLoading, data: arrangeAllData, error: arrangeAllError }] =
     useMutation(arrangeAllOp);
+  const [
+    updateEdgeRoutingPointsMutation,
+    { loading: updateEdgeRoutingPointsLoading, error: updateEdgeRoutingPointsError, data: updateEdgeRoutingPointsData },
+  ] = useMutation<GQLUpdateEdgeRoutingPointsData, GQLUpdateEdgeRoutingPointsVariables>(updateEdgeRoutingPointsOp);
   const [getToolSectionData, { loading: toolSectionLoading, data: toolSectionData }] = useLazyQuery<
     GQLGetToolSectionsData,
     GQLGetToolSectionsVariables
@@ -519,7 +529,7 @@ export const DiagramWebSocketContainer = ({
   );
 
   const moveElement = useCallback(
-    (diagramElementId, newPositionX, newPositionY) => {
+    (diagramElementId: string, newPositionX: number, newPositionY: number) => {
       const input = {
         id: uuid(),
         editingContextId,
@@ -548,6 +558,20 @@ export const DiagramWebSocketContainer = ({
       updateNodeBoundsMutation({ variables: { input } });
     },
     [editingContextId, representationId, updateNodeBoundsMutation]
+  );
+
+  const updateRoutingPointsListener = useCallback(
+    (routingPoints: Point[], edgeId: string) => {
+      const input: GQLUpdateEdgeRoutingPointsInput = {
+        id: uuid(),
+        editingContextId,
+        representationId,
+        diagramElementId: edgeId,
+        routingPoints: routingPoints.map((routingPoint) => ({ x: routingPoint.x, y: routingPoint.y })),
+      };
+      updateEdgeRoutingPointsMutation({ variables: { input } });
+    },
+    [editingContextId, representationId, updateEdgeRoutingPointsMutation]
   );
 
   const invokeHover = (id: string, mouseIsHover: boolean) => {
@@ -678,6 +702,7 @@ export const DiagramWebSocketContainer = ({
         toolSections,
         setContextualPalette,
         setContextualMenu,
+        updateRoutingPointsListener,
         httpOrigin,
       };
       dispatch(initializeRepresentationEvent);
@@ -699,6 +724,7 @@ export const DiagramWebSocketContainer = ({
     httpOrigin,
     dispatch,
     readOnly,
+    updateRoutingPointsListener,
   ]);
 
   useEffect(() => {
@@ -898,6 +924,9 @@ export const DiagramWebSocketContainer = ({
   useEffect(() => {
     handleError(arrangeAllLoading, arrangeAllData, arrangeAllError);
   }, [arrangeAllLoading, arrangeAllData, arrangeAllError, handleError]);
+  useEffect(() => {
+    handleError(updateEdgeRoutingPointsLoading, updateEdgeRoutingPointsData, updateEdgeRoutingPointsError);
+  }, [updateEdgeRoutingPointsLoading, updateEdgeRoutingPointsData, updateEdgeRoutingPointsError, handleError]);
   /**
    * Gather up, it's time for a story.
    *

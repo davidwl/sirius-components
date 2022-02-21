@@ -25,6 +25,7 @@ import { DiagramServer } from 'diagram/sprotty/DiagramServer';
 import { GQLDiagram } from 'index';
 import { MutableRefObject } from 'react';
 import { MousePositionTracker, SModelElement, TYPES } from 'sprotty';
+import { Point } from 'sprotty-protocol';
 import { v4 as uuid } from 'uuid';
 import { Selection } from 'workbench/Workbench.types';
 import { assign, Machine } from 'xstate';
@@ -108,7 +109,7 @@ export type InitializeRepresentationEvent = {
   diagramDomElement: MutableRefObject<any>;
   deleteElements: any;
   invokeTool: any;
-  moveElement: any;
+  moveElement: (diagramElementId: string, newPositionX: number, newPositionY: number) => void;
   resizeElement: any;
   editLabel: any;
   onSelectElement: (selectedElement: SModelElement, diagramServer: DiagramServer, position: Position) => void;
@@ -117,6 +118,7 @@ export type InitializeRepresentationEvent = {
   toolSections: ToolSection[];
   setContextualPalette: (contextualPalette: Palette) => void;
   setContextualMenu: (contextualMenu: Menu) => void;
+  updateRoutingPointsListener: (routingPoints: Point[], edgeId: string) => void;
   httpOrigin: string;
 };
 
@@ -377,6 +379,7 @@ export const diagramWebSocketContainerMachine = Machine<
           toolSections,
           setContextualPalette,
           setContextualMenu,
+          updateRoutingPointsListener,
           httpOrigin,
         } = event as InitializeRepresentationEvent;
 
@@ -401,6 +404,7 @@ export const diagramWebSocketContainerMachine = Machine<
         diagramServer.setHttpOrigin(httpOrigin);
         diagramServer.setActiveToolListener(setActiveTool);
         diagramServer.setOnSelectElementListener(onSelectElement);
+        diagramServer.setUpdateRoutingPointsListener(updateRoutingPointsListener);
 
         return {
           diagramServer,

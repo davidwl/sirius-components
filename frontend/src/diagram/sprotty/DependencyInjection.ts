@@ -32,7 +32,6 @@ import {
   configureViewerOptions,
   ConsoleLogger,
   defaultModule,
-  edgeEditModule,
   edgeLayoutModule,
   EditLabelAction,
   EditLabelActionHandler,
@@ -56,6 +55,7 @@ import {
   SGraph,
   SLabel,
   SModelElement,
+  SRoutingHandle,
   SRoutingHandleView,
   TYPES,
   updateModule,
@@ -65,6 +65,7 @@ import {
 } from 'sprotty';
 import { Action, Point, RequestPopupModelAction, SetPopupModelAction, UpdateModelAction } from 'sprotty-protocol';
 import { siriusCommonModule } from './common/siriusCommonModule';
+import { siriusEdgeEditModule } from './edgeEdition/siriusEdgeEditModule';
 import { siriusRoutingModule } from './routing/siriusRoutingModule';
 
 /**
@@ -137,8 +138,8 @@ const siriusWebContainerModule = new ContainerModule((bind, unbind, isBound, reb
   configureView({ bind, isBound }, 'html', HtmlRootView);
   // @ts-ignore
   configureView({ bind, isBound }, 'pre-rendered', PreRenderedView);
-  configureView({ bind, isBound }, 'routing-point', SRoutingHandleView);
-  configureView({ bind, isBound }, 'volatile-routing-point', SRoutingHandleView);
+  configureModelElement(context, 'routing-point', SRoutingHandle, SRoutingHandleView);
+  configureModelElement(context, 'volatile-routing-point', SRoutingHandle, SRoutingHandleView);
 });
 
 /**
@@ -162,7 +163,7 @@ export const createDependencyInjectionContainer = (containerId: string, getCurso
     updateModule,
     modelSourceModule,
     siriusRoutingModule,
-    edgeEditModule,
+    siriusEdgeEditModule,
     edgeLayoutModule,
     zorderModule,
     siriusWebContainerModule,

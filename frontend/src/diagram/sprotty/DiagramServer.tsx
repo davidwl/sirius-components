@@ -33,6 +33,7 @@ import { ResizeAction, SiriusResizeCommand } from 'diagram/sprotty/resize/sirius
 import {
   ActionHandlerRegistry,
   ApplyLabelEditAction,
+  BringToFrontAction,
   EditLabelAction,
   GetSelectionAction,
   GetViewportAction,
@@ -44,15 +45,18 @@ import {
   MousePositionTracker,
   MoveAction,
   MoveCommand,
+  SEdge,
   SelectionResult,
   SGraph,
   SNode,
+  SwitchEditModeAction,
   ViewportResult,
 } from 'sprotty';
 import {
   Action,
   CenterAction,
   FitToScreenAction,
+  Point,
   SelectAction,
   SetViewportAction,
   UpdateModelAction,
@@ -116,7 +120,7 @@ export class DiagramServer extends ModelSource {
   activeTool: Tool;
   activeConnectorTools: CreateEdgeTool[];
   editLabel;
-  moveElement;
+  moveElement: (diagramElementId: string, newPositionX: number, newPositionY: number) => void;
   resizeElement;
   deleteElements;
 
@@ -125,6 +129,7 @@ export class DiagramServer extends ModelSource {
   setContextualMenu;
   setActiveTool;
   onSelectElement;
+  updateRoutingPointsListener: (routingPoints: Point[], edgeId: string) => void;
 
   // Used to store the edge source element.
   diagramSource: SourceElement | null;
@@ -359,11 +364,27 @@ export class DiagramServer extends ModelSource {
       const convertedDiagram = convertDiagram(diagram, this.httpOrigin, readOnly);
       const sprottyModel = this.modelFactory.createRoot(convertedDiagram);
       this.actionDispatcher.request<SelectionResult>(GetSelectionAction.create()).then((selectionResult) => {
-        sprottyModel.index
-          .all()
-          .filter((element) => selectionResult.selectedElementsIDs.indexOf(element.id) >= 0)
-          .forEach((element) => ((element as any).selected = true));
-        this.actionDispatcher.dispatch(UpdateModelAction.create(sprottyModel as any));
+        const actionsToDispatch: Action[] = [UpdateModelAction.create(sprottyModel as any)];
+
+        if (selectionResult.selectedElementsIDs.length > 0) {
+          // If at least one element is selected dispatch actions that sprotty should have dispatched on a new selection.
+          actionsToDispatch.push(
+            SelectAction.create({ selectedElementsIDs: selectionResult.selectedElementsIDs }),
+            BringToFrontAction.create(selectionResult.selectedElementsIDs)
+          );
+
+          // switch to edit mode for each selected edges.
+          const selectedEdgesId: string[] = [];
+          sprottyModel.children
+            .filter((element) => element instanceof SEdge)
+            .filter((element) => selectionResult.selectedElementsIDs.indexOf(element.id) >= 0)
+            .forEach((selectedEdge) => selectedEdgesId.push(selectedEdge.id));
+          if (selectedEdgesId.length > 0) {
+            actionsToDispatch.push(SwitchEditModeAction.create({ elementsToActivate: selectedEdgesId }));
+          }
+        }
+
+        this.actionDispatcher.dispatchAll(actionsToDispatch);
       });
     } else {
       this.actionDispatcher.dispatch(UpdateModelAction.create(INITIAL_ROOT));
@@ -600,7 +621,7 @@ export class DiagramServer extends ModelSource {
     this.editLabel = editLabel;
   }
 
-  setMoveElementListener(moveElement) {
+  setMoveElementListener(moveElement: (diagramElementId: string, newPositionX: number, newPositionY: number) => void) {
     this.moveElement = moveElement;
   }
   setResizeElementListener(resizeElement) {
@@ -633,5 +654,9 @@ export class DiagramServer extends ModelSource {
 
   setOnSelectElementListener(onSelectElement) {
     this.onSelectElement = onSelectElement;
+  }
+
+  setUpdateRoutingPointsListener(updateRoutingPointsListener: (routingPoints: Point[], edgeId: string) => void) {
+    this.updateRoutingPointsListener = updateRoutingPointsListener;
   }
 }

@@ -176,6 +176,7 @@ export interface GQLRatio {
 }
 
 export interface GQLPosition {
+  __typename: string;
   x: number;
   y: number;
 }
@@ -366,10 +367,28 @@ export interface GQLInvokeEdgeToolOnDiagramSuccessPayload extends GQLInvokeEdgeT
   newSelection: GQLWorkbenchSelection;
 }
 
+export interface GQLUpdateEdgeRoutingPointsVariables {
+  input: GQLUpdateEdgeRoutingPointsInput;
+}
+export interface GQLUpdateEdgeRoutingPointsInput {
+  id: string;
+  representationId: string;
+  editingContextId: string;
+  diagramElementId: string;
+  routingPoints: Position[];
+}
+export interface GQLUpdateEdgeRoutingPointsData {
+  updateEdgeRoutingPoints: GQLUpdateEdgeRoutingPointsPayload;
+}
+export interface GQLUpdateEdgeRoutingPointsPayload {
+  __typename: string;
+}
+
 export interface GQLErrorPayload
   extends GQLDiagramEventPayload,
     GQLInvokeNodeToolOnDiagramPayload,
-    GQLInvokeEdgeToolOnDiagramPayload {
+    GQLInvokeEdgeToolOnDiagramPayload,
+    GQLUpdateEdgeRoutingPointsPayload {
   message: string;
 }
 export interface GQLWorkbenchSelection {

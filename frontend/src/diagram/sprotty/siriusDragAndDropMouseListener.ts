@@ -62,7 +62,7 @@ export class SiriusDragAndDropMouseListener extends MoveMouseListener {
   }
 
   protected isResizing(): Boolean {
-    return this.startResizePosition != undefined;
+    return this.startResizePosition !== undefined;
   }
 
   public mouseUp(target: SModelElement, event: MouseEvent): Action[] {
