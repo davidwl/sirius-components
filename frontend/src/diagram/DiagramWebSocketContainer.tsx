@@ -21,6 +21,7 @@ import { ServerContext } from 'common/ServerContext';
 import {
   CreateEdgeTool,
   CreateNodeTool,
+  CursorValue,
   GQLDeletionPolicy,
   GQLDiagramDescription,
   GQLDiagramEventPayload,
@@ -629,8 +630,8 @@ export const DiagramWebSocketContainer = ({
       diagramServer.actionDispatcher.dispatch(selectSprottyAction);
     };
 
-    const getCursorOn = (element, diagramServer: DiagramServer) => {
-      let cursor = 'pointer';
+    const getCursorOn = (element, diagramServer: DiagramServer): CursorValue => {
+      let cursor: CursorValue = 'pointer';
       if (diagramServer.diagramSource) {
         if (diagramServer.activeConnectorTools.length > 0) {
           const cursorAllowed = atLeastOneCanInvokeEdgeTool(

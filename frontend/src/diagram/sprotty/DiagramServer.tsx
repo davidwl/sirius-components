@@ -13,6 +13,7 @@
 import {
   Bounds,
   CreateEdgeTool,
+  CursorValue,
   GQLDeletionPolicy,
   Menu,
   Palette,
@@ -138,6 +139,7 @@ export class DiagramServer extends ModelSource {
   httpOrigin;
 
   firstOpen: boolean = true;
+  getCursorOn: (element: any, diagramServer: DiagramServer) => CursorValue;
 
   initialize(registry: ActionHandlerRegistry) {
     super.initialize(registry);
@@ -364,6 +366,7 @@ export class DiagramServer extends ModelSource {
       const convertedDiagram = convertDiagram(diagram, this.httpOrigin, readOnly);
       const sprottyModel = this.modelFactory.createRoot(convertedDiagram);
       this.actionDispatcher.request<SelectionResult>(GetSelectionAction.create()).then((selectionResult) => {
+        (sprottyModel as any).cursor = 'pointer';
         const actionsToDispatch: Action[] = [UpdateModelAction.create(sprottyModel as any)];
 
         if (selectionResult.selectedElementsIDs.length > 0) {
@@ -658,5 +661,9 @@ export class DiagramServer extends ModelSource {
 
   setUpdateRoutingPointsListener(updateRoutingPointsListener: (routingPoints: Point[], edgeId: string) => void) {
     this.updateRoutingPointsListener = updateRoutingPointsListener;
+  }
+
+  setGetCursorOnListener(getCursorOn: (element, diagramServer: DiagramServer) => CursorValue) {
+    this.getCursorOn = getCursorOn;
   }
 }

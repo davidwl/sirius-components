@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 THALES GLOBAL SERVICES.
+ * Copyright (c) 2021, 2022 THALES GLOBAL SERVICES.
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,8 @@
  *******************************************************************************/
 import {
   CreateEdgeTool,
+  CursorValue,
+  GQLDiagram,
   GQLDiagramDescription,
   Menu,
   Palette,
@@ -22,7 +24,6 @@ import {
 } from 'diagram/DiagramWebSocketContainer.types';
 import { createDependencyInjectionContainer } from 'diagram/sprotty/DependencyInjection';
 import { DiagramServer } from 'diagram/sprotty/DiagramServer';
-import { GQLDiagram } from 'index';
 import { MutableRefObject } from 'react';
 import { MousePositionTracker, SModelElement, TYPES } from 'sprotty';
 import { Point } from 'sprotty-protocol';
@@ -113,7 +114,7 @@ export type InitializeRepresentationEvent = {
   resizeElement: any;
   editLabel: any;
   onSelectElement: (selectedElement: SModelElement, diagramServer: DiagramServer, position: Position) => void;
-  getCursorOn: any;
+  getCursorOn: (element, diagramServer: DiagramServer) => CursorValue;
   setActiveTool: (tool: Tool) => void;
   toolSections: ToolSection[];
   setContextualPalette: (contextualPalette: Palette) => void;
@@ -383,7 +384,7 @@ export const diagramWebSocketContainerMachine = Machine<
           httpOrigin,
         } = event as InitializeRepresentationEvent;
 
-        const container = createDependencyInjectionContainer(diagramDomElement.current.id, getCursorOn);
+        const container = createDependencyInjectionContainer(diagramDomElement.current.id);
         const diagramServer = <DiagramServer>container.get(TYPES.ModelSource);
 
         /**
@@ -405,6 +406,7 @@ export const diagramWebSocketContainerMachine = Machine<
         diagramServer.setActiveToolListener(setActiveTool);
         diagramServer.setOnSelectElementListener(onSelectElement);
         diagramServer.setUpdateRoutingPointsListener(updateRoutingPointsListener);
+        diagramServer.setGetCursorOnListener(getCursorOn);
 
         return {
           diagramServer,
