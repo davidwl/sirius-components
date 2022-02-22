@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 THALES GLOBAL SERVICES.
+ * Copyright (c) 2021, 2022 THALES GLOBAL SERVICES.
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -48,7 +48,6 @@ export class SiriusMoveCommand extends MoveCommand {
   private resetEdgesRoutingPoints(AllEdgesToReset: Set<SEdge>) {
     AllEdgesToReset.forEach((edge) => {
       const router = this.edgeRouterRegistry!.get(edge.routerKind);
-      edge.routingPoints = [];
       const routedPoints = router.route(edge);
       if (edge.sourceId === edge.targetId) {
         // Do not put source and target routed point as routing pointed.
