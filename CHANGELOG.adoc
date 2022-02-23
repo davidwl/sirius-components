@@ -9,6 +9,7 @@
 - [ADR-041] Add the ability to contribute additional services to the EMFQueryService
 - [ADR-042] Use wildcard collections instead of List<Object> in Providers
 - [ADR-043] Do not considering the source and target connections as routing points anymore
+- [ADR-046] Add support for the edition of routing points
 
 === Deprecation warning
 - [core] The various DTOs related to the creation and renaming of both documents and representations will be removed from the project at some point. The only reason why we will keep them for the moment is that some of them are used to trigger some specific behavior in the `EditingContextEventProcessor`. The split of the representation metadata should help us remove those special use cases
@@ -58,7 +59,7 @@
 - https://github.com/eclipse-sirius/sirius-components/issues/1018[#1018] [compatibility] Add support for the `Navigation` model operation from Sirius RCP
 - https://github.com/eclipse-sirius/sirius-components/issues/1026[#1026] [compatibility] Add support for `OperationAction`. The action are converted to regular tools available in the palette of the frontend
 - https://github.com/eclipse-sirius/sirius-components/issues/937[#937] [diagram] Add the ability to export diagram as SVG images
-
+- https://github.com/eclipse-sirius/sirius-components/issues/997[#997] [diagram] Add the support for edition of edges routing points.
 
 == v2022.01.0
 
