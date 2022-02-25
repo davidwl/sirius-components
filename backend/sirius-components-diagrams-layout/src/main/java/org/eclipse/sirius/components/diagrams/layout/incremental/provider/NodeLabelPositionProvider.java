@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 THALES GLOBAL SERVICES.
+ * Copyright (c) 2021, 2022 THALES GLOBAL SERVICES.
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -79,7 +79,9 @@ public class NodeLabelPositionProvider {
                 }
                 break;
             case H_CENTER:
-                x = (node.getSize().getWidth() - label.getTextBounds().getSize().getWidth()) / 2;
+                // The label is positioned at the center of the node and the front-end will apply a "'text-anchor':
+                // 'middle'" property.
+                x = node.getSize().getWidth() / 2;
                 break;
             case H_RIGHT:
                 if (outside) {

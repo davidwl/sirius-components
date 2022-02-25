@@ -128,6 +128,8 @@ const siriusWebContainerModule = new ContainerModule((bind, unbind, isBound, reb
   // @ts-ignore
   configureModelElement(context, 'label:outside-center', SEditableLabel, LabelView);
   // @ts-ignore
+  configureModelElement(context, 'label:outside', SEditableLabel, LabelView);
+  // @ts-ignore
   configureModelElement(context, 'label:edge-begin', SEditableLabel, LabelView);
   // @ts-ignore
   configureModelElement(context, 'label:edge-center', SEditableLabel, LabelView);

@@ -31,6 +31,7 @@ export class LabelView extends SLabelView {
       'font-weight': 'normal',
       'font-style': 'normal',
       'text-decoration': 'none',
+      'text-anchor': 'start',
     };
     if (bold) {
       styleObject['font-weight'] = 'bold';
@@ -47,6 +48,9 @@ export class LabelView extends SLabelView {
       } else {
         styleObject['text-decoration'] += ' line-through';
       }
+    }
+    if (label.type?.includes('center')) {
+      styleObject['text-anchor'] = 'middle';
     }
     const iconVerticalOffset = -12;
     const vnode = (
