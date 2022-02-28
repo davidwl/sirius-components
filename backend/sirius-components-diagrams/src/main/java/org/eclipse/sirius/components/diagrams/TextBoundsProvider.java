@@ -41,7 +41,8 @@ public class TextBoundsProvider {
     private static String fontName;
 
     /**
-     * Computes the text bounds for a label with the given text.
+     * Computes the text bounds for a label with the given text.<br>
+     * The text bounds take into account the line return contained in text.
      *
      * @param labelStyle
      *            the label style
@@ -58,10 +59,23 @@ public class TextBoundsProvider {
             fontStyle = fontStyle | Font.ITALIC;
         }
         Font font = new Font(this.getFontName(), fontStyle, labelStyle.getFontSize());
-        Rectangle2D stringBounds = font.getStringBounds(text, FONT_RENDER_CONTEXT);
-        double width = stringBounds.getWidth();
-        double height = stringBounds.getHeight();
 
+        String[] lines = text.split("\\n", -1); //$NON-NLS-1$
+        Rectangle2D labelBounds = font.getStringBounds(lines[0], FONT_RENDER_CONTEXT);
+        if (lines.length > 1) {
+            for (int i = 1; i < lines.length; i++) {
+                String line = lines[i];
+
+                Rectangle2D lineBounds = font.getStringBounds(line, FONT_RENDER_CONTEXT);
+                // shift the rectangle under the previous line
+                lineBounds.setFrame(lineBounds.getX(), lineBounds.getY() + labelBounds.getHeight(), lineBounds.getWidth(), lineBounds.getHeight());
+
+                labelBounds = labelBounds.createUnion(lineBounds);
+            }
+        }
+
+        double height = labelBounds.getHeight();
+        double width = labelBounds.getWidth();
         double iconWidth = 0;
         double iconHeight = 0;
         if (!labelStyle.getIconURL().isEmpty()) {
@@ -74,7 +88,7 @@ public class TextBoundsProvider {
         Size size = Size.of(width + iconWidth, height + iconHeight);
 
         // Sprotty needs the inverse of the x and y for the alignment, so it's "0 - x" and "0 - y" on purpose
-        Position alignment = Position.at(0 - stringBounds.getX() + iconWidth, 0 - stringBounds.getY());
+        Position alignment = Position.at(0 - labelBounds.getX() + iconWidth, 0 - labelBounds.getY());
 
         return new TextBounds(size, alignment);
     }
