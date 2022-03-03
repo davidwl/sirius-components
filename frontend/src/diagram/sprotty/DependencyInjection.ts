@@ -10,7 +10,7 @@
  * Contributors:
  *     Obeo - initial API and implementation
  *******************************************************************************/
-import { BorderNode, Node } from 'diagram/sprotty/Diagram.types';
+import { BorderNode, Label, Node } from 'diagram/sprotty/Diagram.types';
 import { DiagramServer, HIDE_CONTEXTUAL_TOOLBAR_ACTION, SPROTTY_DELETE_ACTION } from 'diagram/sprotty/DiagramServer';
 import { SetActiveConnectorToolsAction, SetActiveToolAction } from 'diagram/sprotty/DiagramServer.types';
 import { edgeCreationFeedback } from 'diagram/sprotty/edgeCreationFeedback';
@@ -39,6 +39,8 @@ import {
   EditLabelUI,
   exportModule,
   fadeModule,
+  getAbsoluteClientBounds,
+  getZoom,
   graphModule,
   hoverModule,
   HtmlRootView,
@@ -66,25 +68,64 @@ import {
 } from 'sprotty';
 import { Action, Point, RequestPopupModelAction, SetPopupModelAction, UpdateModelAction } from 'sprotty-protocol';
 
-/**
- * Extends Sprotty's SLabel to add support for having the initial text when entering
- * in direct edit mode different from the text's label itself, and makes the
- * pre-selection of the edited text optional.
- */
-export class SEditableLabel extends SLabel {
-  initialText: string;
-  preSelect: boolean = true;
-}
-
 class EditLabelUIWithInitialContent extends EditLabelUI {
   protected applyTextContents() {
-    if (this.label instanceof SEditableLabel) {
-      this.inputElement.value = this.label.initialText || this.label.text;
+    if (this.label instanceof Label) {
+      this.editControl.value = this.label.initialText || this.label.text;
       if (this.label.preSelect) {
-        this.inputElement.setSelectionRange(0, this.inputElement.value.length);
+        this.editControl.setSelectionRange(0, this.editControl.value.length);
       }
     } else {
       super.applyTextContents();
+    }
+  }
+
+  /**
+   * Overriden to having the same editing area size and to center it with the edited label
+   */
+  protected setPosition(containerElement: HTMLElement) {
+    let x = 0;
+    let y = 0;
+    let width = 100;
+    let height = 20;
+    // used to avoid the scrollbar
+    const extraSize: number = 10;
+
+    if (this.label) {
+      const nbLines: number = this.label.text.split('\n').length;
+      const zoom = getZoom(this.label);
+      const bounds = getAbsoluteClientBounds(this.label, this.domHelper, this.viewerOptions);
+      // make the edit area centered on the label
+      x = bounds.x + (bounds.width * (1 - 1 / zoom)) / 2;
+      y = bounds.y;
+      height = height * nbLines + extraSize;
+      width = bounds.width / zoom + extraSize;
+    }
+
+    containerElement.style.left = `${x}px`;
+    containerElement.style.top = `${y}px`;
+    containerElement.style.width = `${width}px`;
+    this.editControl.style.width = `${width}px`;
+    containerElement.style.height = `${height}px`;
+    this.editControl.style.height = `${height}px`;
+  }
+
+  /**
+   * Overriden to keep the same font size whatever the zoom and to center the text
+   */
+  protected applyFontStyling() {
+    // super.applyFontStyling();
+    if (this.label) {
+      this.labelElement = document.getElementById(this.domHelper.createUniqueDOMElementId(this.label));
+      if (this.labelElement) {
+        this.labelElement.style.visibility = 'hidden';
+        const style = window.getComputedStyle(this.labelElement);
+        this.editControl.style.font = style.font;
+        this.editControl.style.fontStyle = style.fontStyle;
+        this.editControl.style.fontFamily = style.fontFamily;
+        this.editControl.style.fontWeight = style.fontWeight;
+        this.editControl.style.textAlign = 'center';
+      }
     }
   }
 }
@@ -124,17 +165,17 @@ const siriusWebContainerModule = new ContainerModule((bind, unbind, isBound, reb
   configureModelElement(context, 'port:image', BorderNode, ImageView);
   configureView({ bind, isBound }, 'edge:straight', EdgeView);
   // @ts-ignore
-  configureModelElement(context, 'label:inside-center', SEditableLabel, LabelView);
+  configureModelElement(context, 'label:inside-center', Label, LabelView);
   // @ts-ignore
-  configureModelElement(context, 'label:outside-center', SEditableLabel, LabelView);
+  configureModelElement(context, 'label:outside-center', Label, LabelView);
   // @ts-ignore
-  configureModelElement(context, 'label:outside', SEditableLabel, LabelView);
+  configureModelElement(context, 'label:outside', Label, LabelView);
   // @ts-ignore
-  configureModelElement(context, 'label:edge-begin', SEditableLabel, LabelView);
+  configureModelElement(context, 'label:edge-begin', Label, LabelView);
   // @ts-ignore
-  configureModelElement(context, 'label:edge-center', SEditableLabel, LabelView);
+  configureModelElement(context, 'label:edge-center', Label, LabelView);
   // @ts-ignore
-  configureModelElement(context, 'label:edge-end', SEditableLabel, LabelView);
+  configureModelElement(context, 'label:edge-end', Label, LabelView);
   // @ts-ignore
   configureView({ bind, isBound }, 'comp:main', SCompartmentView);
   configureView({ bind, isBound }, 'html', HtmlRootView);
