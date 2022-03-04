@@ -62,7 +62,7 @@ public class NodeLabelPositionProviderTests {
         LabelLayoutData labelLayoutData = this.createLabelLayoutData();
 
         Position position = labelBoundsProvider.getPosition(nodeLayoutData, labelLayoutData);
-        assertThat(position).extracting(Position::getX).isEqualTo(Double.valueOf(42.5390625));
+        assertThat(position).extracting(Position::getX).isEqualTo(Double.valueOf(DEFAULT_NODE_SIZE.getWidth() / 2));
         assertThat(position).extracting(Position::getY).isEqualTo(Double.valueOf(-23.3984375));
     }
 
@@ -73,7 +73,7 @@ public class NodeLabelPositionProviderTests {
         NodeLabelPositionProvider labelBoundsProvider = new NodeLabelPositionProvider(new LayoutConfiguratorRegistry(List.of()).getDefaultLayoutConfigurator());
         LabelLayoutData labelLayoutData = this.createLabelLayoutData();
         Position position = labelBoundsProvider.getPosition(nodeLayoutData, labelLayoutData);
-        assertThat(position).extracting(Position::getX).isEqualTo(Double.valueOf(42.5390625));
+        assertThat(position).extracting(Position::getX).isEqualTo(Double.valueOf(DEFAULT_NODE_SIZE.getWidth() / 2));
         assertThat(position).extracting(Position::getY).isEqualTo(Double.valueOf(5));
     }
 
