@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 THALES GLOBAL SERVICES.
+ * Copyright (c) 2021, 2022 THALES GLOBAL SERVICES.
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -51,14 +51,7 @@ public class TextBoundsProvider {
      * @return the text bounds
      */
     public TextBounds computeBounds(LabelStyle labelStyle, String text) {
-        int fontStyle = Font.PLAIN;
-        if (labelStyle.isBold()) {
-            fontStyle = fontStyle | Font.BOLD;
-        }
-        if (labelStyle.isItalic()) {
-            fontStyle = fontStyle | Font.ITALIC;
-        }
-        Font font = new Font(this.getFontName(), fontStyle, labelStyle.getFontSize());
+        Font font = this.getFont(labelStyle);
 
         String[] lines = text.split("\\n", -1); //$NON-NLS-1$
         Rectangle2D labelBounds = font.getStringBounds(lines[0], FONT_RENDER_CONTEXT);
@@ -91,6 +84,23 @@ public class TextBoundsProvider {
         Position alignment = Position.at(0 - labelBounds.getX() + iconWidth, 0 - labelBounds.getY());
 
         return new TextBounds(size, alignment);
+    }
+
+    public double getLineHeight(LabelStyle labelStyle, String text) {
+        Font font = this.getFont(labelStyle);
+        Rectangle2D labelBounds = font.getStringBounds(text, FONT_RENDER_CONTEXT);
+        return labelBounds.getHeight();
+    }
+
+    private Font getFont(LabelStyle labelStyle) {
+        int fontStyle = Font.PLAIN;
+        if (labelStyle.isBold()) {
+            fontStyle = fontStyle | Font.BOLD;
+        }
+        if (labelStyle.isItalic()) {
+            fontStyle = fontStyle | Font.ITALIC;
+        }
+        return new Font(this.getFontName(), fontStyle, labelStyle.getFontSize());
     }
 
     private String getFontName() {
