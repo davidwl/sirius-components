@@ -14,6 +14,7 @@ import { BorderNode, Label, Node } from 'diagram/sprotty/Diagram.types';
 import { DiagramServer, HIDE_CONTEXTUAL_TOOLBAR_ACTION, SPROTTY_DELETE_ACTION } from 'diagram/sprotty/DiagramServer';
 import { SetActiveConnectorToolsAction, SetActiveToolAction } from 'diagram/sprotty/DiagramServer.types';
 import { edgeCreationFeedback } from 'diagram/sprotty/edgeCreationFeedback';
+import { EditLabelUIWithInitialContent } from 'diagram/sprotty/EditLabelUIWithInitialContent';
 import { GraphFactory } from 'diagram/sprotty/GraphFactory';
 import siriusDragAndDropModule from 'diagram/sprotty/siriusDragAndDropModule';
 import { DiagramView } from 'diagram/sprotty/views/DiagramView';
@@ -36,11 +37,8 @@ import {
   edgeLayoutModule,
   EditLabelAction,
   EditLabelActionHandler,
-  EditLabelUI,
   exportModule,
   fadeModule,
-  getAbsoluteClientBounds,
-  getZoom,
   graphModule,
   hoverModule,
   HtmlRootView,
@@ -67,68 +65,6 @@ import {
   zorderModule,
 } from 'sprotty';
 import { Action, Point, RequestPopupModelAction, SetPopupModelAction, UpdateModelAction } from 'sprotty-protocol';
-
-class EditLabelUIWithInitialContent extends EditLabelUI {
-  protected applyTextContents() {
-    if (this.label instanceof Label) {
-      this.editControl.value = this.label.initialText || this.label.text;
-      if (this.label.preSelect) {
-        this.editControl.setSelectionRange(0, this.editControl.value.length);
-      }
-    } else {
-      super.applyTextContents();
-    }
-  }
-
-  /**
-   * Overriden to having the same editing area size and to center it with the edited label
-   */
-  protected setPosition(containerElement: HTMLElement) {
-    let x = 0;
-    let y = 0;
-    let width = 100;
-    let height = 20;
-    // used to avoid the scrollbar
-    const extraSize: number = 10;
-
-    if (this.label) {
-      const nbLines: number = this.label.text.split('\n').length;
-      const zoom = getZoom(this.label);
-      const bounds = getAbsoluteClientBounds(this.label, this.domHelper, this.viewerOptions);
-      // make the edit area centered on the label
-      x = bounds.x + (bounds.width * (1 - 1 / zoom)) / 2;
-      y = bounds.y;
-      height = height * nbLines + extraSize;
-      width = bounds.width / zoom + extraSize;
-    }
-
-    containerElement.style.left = `${x}px`;
-    containerElement.style.top = `${y}px`;
-    containerElement.style.width = `${width}px`;
-    this.editControl.style.width = `${width}px`;
-    containerElement.style.height = `${height}px`;
-    this.editControl.style.height = `${height}px`;
-  }
-
-  /**
-   * Overriden to keep the same font size whatever the zoom and to center the text
-   */
-  protected applyFontStyling() {
-    // super.applyFontStyling();
-    if (this.label) {
-      this.labelElement = document.getElementById(this.domHelper.createUniqueDOMElementId(this.label));
-      if (this.labelElement) {
-        this.labelElement.style.visibility = 'hidden';
-        const style = window.getComputedStyle(this.labelElement);
-        this.editControl.style.font = style.font;
-        this.editControl.style.fontStyle = style.fontStyle;
-        this.editControl.style.fontFamily = style.fontFamily;
-        this.editControl.style.fontWeight = style.fontWeight;
-        this.editControl.style.textAlign = 'center';
-      }
-    }
-  }
-}
 
 const labelEditUiModule = new ContainerModule((bind, _unbind, isBound) => {
   const context = { bind, isBound };

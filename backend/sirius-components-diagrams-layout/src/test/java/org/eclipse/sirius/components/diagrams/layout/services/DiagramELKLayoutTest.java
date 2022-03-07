@@ -10,7 +10,7 @@
  * Contributors:
  *     Obeo - initial API and implementation
  *******************************************************************************/
-package org.eclipse.sirius.components.diagrams.layout.incremental;
+package org.eclipse.sirius.components.diagrams.layout.services;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -30,28 +30,27 @@ import org.eclipse.sirius.components.diagrams.Node;
 import org.eclipse.sirius.components.diagrams.Position;
 import org.eclipse.sirius.components.diagrams.Size;
 import org.eclipse.sirius.components.diagrams.description.DiagramDescription;
-import org.eclipse.sirius.components.diagrams.events.IDiagramEvent;
-import org.eclipse.sirius.components.diagrams.events.NodeCreationEvent;
+import org.eclipse.sirius.components.diagrams.layout.ELKDiagramConverter;
 import org.eclipse.sirius.components.diagrams.layout.ELKLayoutedDiagramProvider;
-import org.eclipse.sirius.components.diagrams.layout.IELKDiagramConverter;
 import org.eclipse.sirius.components.diagrams.layout.LayoutConfiguratorRegistry;
 import org.eclipse.sirius.components.diagrams.layout.LayoutService;
+import org.eclipse.sirius.components.diagrams.layout.TextBoundsService;
+import org.eclipse.sirius.components.diagrams.layout.incremental.IncrementalLayoutDiagramConverter;
+import org.eclipse.sirius.components.diagrams.layout.incremental.IncrementalLayoutEngine;
+import org.eclipse.sirius.components.diagrams.layout.incremental.IncrementalLayoutedDiagramProvider;
 import org.eclipse.sirius.components.diagrams.layout.incremental.provider.ImageSizeProvider;
 import org.eclipse.sirius.components.diagrams.layout.incremental.provider.NodeSizeProvider;
-import org.eclipse.sirius.components.diagrams.layout.services.DefaultTestDiagramDescriptionProvider;
-import org.eclipse.sirius.components.diagrams.layout.services.TestDiagramCreationService;
-import org.eclipse.sirius.components.diagrams.layout.services.TestLayoutObjectService;
 import org.eclipse.sirius.components.diagrams.tests.builder.JsonBasedEditingContext;
 import org.eclipse.sirius.components.diagrams.tests.builder.TestLayoutDiagramBuilder;
 import org.eclipse.sirius.components.representations.IRepresentationDescription;
 import org.junit.jupiter.api.Test;
 
 /**
- * Used to test diagram layout.
+ * Used to test the diagram full layout.
  *
- * @author gcoutable
+ * @author lfasani
  */
-public class DiagramLayoutTest {
+public class DiagramELKLayoutTest {
 
     private TestLayoutObjectService objectService = new TestLayoutObjectService();
 
@@ -82,7 +81,7 @@ public class DiagramLayoutTest {
         IRepresentationDescriptionSearchService.NoOp representationDescriptionSearchService = new IRepresentationDescriptionSearchService.NoOp() {
             @Override
             public Optional<IRepresentationDescription> findById(IEditingContext editingContext, UUID representationDescriptionId) {
-                DiagramDescription diagramDescription = DiagramLayoutTest.this.defaultTestDiagramDescriptionProvider.getDefaultDiagramDescription(diagram);
+                DiagramDescription diagramDescription = DiagramELKLayoutTest.this.defaultTestDiagramDescriptionProvider.getDefaultDiagramDescription(diagram);
                 return Optional.of(diagramDescription);
             }
         };
@@ -90,73 +89,43 @@ public class DiagramLayoutTest {
         NodeSizeProvider nodeSizeProvider = new NodeSizeProvider(new ImageSizeProvider());
         IncrementalLayoutEngine incrementalLayoutEngine = new IncrementalLayoutEngine(nodeSizeProvider);
 
-        LayoutService layoutService = new LayoutService(new IELKDiagramConverter.NoOp(), new IncrementalLayoutDiagramConverter(), new LayoutConfiguratorRegistry(List.of()),
-                new ELKLayoutedDiagramProvider(), new IncrementalLayoutedDiagramProvider(), representationDescriptionSearchService, incrementalLayoutEngine);
+        LayoutService layoutService = new LayoutService(new ELKDiagramConverter(new TextBoundsService(), new ImageSizeProvider()), new IncrementalLayoutDiagramConverter(),
+                new LayoutConfiguratorRegistry(List.of()), new ELKLayoutedDiagramProvider(), new IncrementalLayoutedDiagramProvider(), representationDescriptionSearchService, incrementalLayoutEngine);
 
         return new TestDiagramCreationService(this.objectService, representationDescriptionSearchService, layoutService);
     }
 
     @Test
-    public void testSimpleDiagramLayout() throws IOException {
-        String firstParentTargetObjectId = "First Parent"; //$NON-NLS-1$
-        String secondParentTargetObjectId = "Second Parent"; //$NON-NLS-1$
+    public void testNodeLayoutWithMultilineLabel() throws IOException {
+        String nodeLabelWithMultiple = "First LineAAAAAAAA\nSecond LineBBBBBBBBB"; //$NON-NLS-1$
         String firstChildTargetObjectId = "First child"; //$NON-NLS-1$
-        String secondChildTargetObjectId = "Second child"; //$NON-NLS-1$
 
         // @formatter:off
         Diagram diagram = TestLayoutDiagramBuilder.diagram("Root") //$NON-NLS-1$
             .nodes()
-                .rectangleNode(firstParentTargetObjectId).at(10, 10).of(200, 300)
+                .rectangleNode(nodeLabelWithMultiple).at(10, 10).of(10, 10)
                     .childNodes()
                         .rectangleNode(firstChildTargetObjectId).at(10, 10).of(50, 50).and()
-                        .rectangleNode(secondChildTargetObjectId).at(70, 70).of(50, 50).and()
-                        .and()
                     .and()
-                .rectangleNode(secondParentTargetObjectId).at(300, 400).of(100, 100).and()
                 .and()
-            .edge("Link") //$NON-NLS-1$
-                .from(firstParentTargetObjectId).at(0.5, 0.5)
-                .to(secondParentTargetObjectId).at(0.8, 0.8)
-                .and()
-            .edge("Opposite Link") //$NON-NLS-1$
-                .from(secondParentTargetObjectId).at(0.2, 0.7)
-                .to(firstParentTargetObjectId).at(0.1, 0.9)
             .and()
         .build();
         // @formatter:on
 
-        Path path = Paths.get("src", "test", "resources", "editing-contexts", "testSimpleDiagramLayout"); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$ //$NON-NLS-5$
+        Path path = Paths.get("src", "test", "resources", "editing-contexts", "testNodeLayoutWithMultilineLabel"); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$ //$NON-NLS-5$
         JsonBasedEditingContext editingContext = new JsonBasedEditingContext(path);
 
         TestDiagramCreationService diagramCreationService = this.createDiagramCreationService(diagram);
 
-        Optional<Diagram> optionalRefreshedDiagram = diagramCreationService.performRefresh(editingContext, diagram);
-        assertThat(optionalRefreshedDiagram).isNotEmpty();
-        Diagram refreshedDiagram = optionalRefreshedDiagram.get();
+        Diagram layoutedDiagram = diagramCreationService.performElKLayout(editingContext, diagram);
 
-        Optional<Node> optionalFirstParent = this.getNode(refreshedDiagram.getNodes(), firstParentTargetObjectId);
-        assertThat(optionalFirstParent).isPresent();
-        Node firstParent = optionalFirstParent.get();
-        assertThat(firstParent.getPosition()).isEqualTo(Position.at(10, 10));
-        assertThat(firstParent.getSize()).isEqualTo(Size.of(200, 300));
+        Node firstParent = layoutedDiagram.getNodes().get(0);
 
-        Optional<Node> optionalFirstChild = this.getNode(refreshedDiagram.getNodes(), firstChildTargetObjectId);
-        assertThat(optionalFirstChild).isPresent();
-        Node firstChild = optionalFirstChild.get();
-        assertThat(firstChild.getPosition()).isEqualTo(Position.at(10, 10));
-        assertThat(firstChild.getSize()).isEqualTo(Size.of(50, 50));
+        // Check that the parent node and the label have the right size
+        assertThat(firstParent.getSize()).isEqualTo(Size.of(195.8818359375, 131.197265625));
+        assertThat(firstParent.getLabel().getSize()).isEqualTo(Size.of(161.8818359375, 32.197265625));
 
-        Optional<Node> optionalThirdParent = this.getNode(refreshedDiagram.getNodes(), "Third Parent"); //$NON-NLS-1$
-        assertThat(optionalThirdParent).isPresent();
-        Node thirdParent = optionalThirdParent.get();
-        assertThat(thirdParent.getPosition()).isEqualTo(Position.UNDEFINED);
-
-        IDiagramEvent diagramEvent = new NodeCreationEvent(Position.at(300, 100));
-        Diagram layoutedDiagram = diagramCreationService.performLayout(editingContext, refreshedDiagram, diagramEvent);
-
-        Optional<Node> optionalLayoutedThirdParent = this.getNode(layoutedDiagram.getNodes(), "Third Parent"); //$NON-NLS-1$
-        assertThat(optionalLayoutedThirdParent).isPresent();
-        Node layoutedThirdParent = optionalLayoutedThirdParent.get();
-        assertThat(layoutedThirdParent.getPosition()).isEqualTo(Position.at(301, 101));
+        // Check that the inner node is under the multi line label area
+        assertThat(firstParent.getChildNodes().get(0).getPosition()).isEqualTo(Position.at(12, 49.197265625));
     }
 }

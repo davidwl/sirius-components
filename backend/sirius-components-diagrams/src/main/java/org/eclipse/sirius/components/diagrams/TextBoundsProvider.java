@@ -54,16 +54,21 @@ public class TextBoundsProvider {
         Font font = this.getFont(labelStyle);
 
         String[] lines = text.split("\\n", -1); //$NON-NLS-1$
-        Rectangle2D labelBounds = font.getStringBounds(lines[0], FONT_RENDER_CONTEXT);
-        if (lines.length > 1) {
-            for (int i = 1; i < lines.length; i++) {
-                String line = lines[i];
+        Rectangle2D labelBounds = null;
+        if (lines.length == 0) {
+            labelBounds = font.getStringBounds("", FONT_RENDER_CONTEXT); //$NON-NLS-1$
+        } else {
+            labelBounds = font.getStringBounds(lines[0], FONT_RENDER_CONTEXT);
+            if (lines.length > 1) {
+                for (int i = 1; i < lines.length; i++) {
+                    String line = lines[i];
 
-                Rectangle2D lineBounds = font.getStringBounds(line, FONT_RENDER_CONTEXT);
-                // shift the rectangle under the previous line
-                lineBounds.setFrame(lineBounds.getX(), lineBounds.getY() + labelBounds.getHeight(), lineBounds.getWidth(), lineBounds.getHeight());
+                    Rectangle2D lineBounds = font.getStringBounds(line, FONT_RENDER_CONTEXT);
+                    // shift the rectangle under the previous line
+                    lineBounds.setFrame(lineBounds.getX(), lineBounds.getY() + labelBounds.getHeight(), lineBounds.getWidth(), lineBounds.getHeight());
 
-                labelBounds = labelBounds.createUnion(lineBounds);
+                    labelBounds = labelBounds.createUnion(lineBounds);
+                }
             }
         }
 

@@ -49,15 +49,40 @@ export class LabelView extends SLabelView {
         styleObject['text-decoration'] += ' line-through';
       }
     }
-    if (label.type?.includes('center')) {
+    if (label.type.includes('center')) {
       styleObject['text-anchor'] = 'middle';
     }
     const iconVerticalOffset = -12;
+
+    const text = label.text;
+    const Text = () => {
+      const lines = text.split('\n');
+      if (lines.length == 1) {
+        return text;
+      } else {
+        return lines.map((line, index) => {
+          if (index === 0) {
+            return <tspan x="0">{line}</tspan>;
+          } else {
+            if (line.length == 0) {
+              // avoid tspan to be ignored if there is only a line return
+              line = ' '; //$NON-NLS-1$
+            }
+            return (
+              <tspan x="0" dy={fontSize}>
+                {line}
+              </tspan>
+            );
+          }
+        });
+      }
+    };
+
     const vnode = (
       <g attrs-data-testid={`Label - ${label.text}`}>
         {iconURL ? <image href={iconURL} y={iconVerticalOffset} x="-20" /> : ''}
         <text class-sprotty-label={true} style={styleObject}>
-          {this.convertText(label.text, fontSize)}
+          <Text />
         </text>
       </g>
     );
@@ -67,27 +92,5 @@ export class LabelView extends SLabelView {
       setAttr(vnode, 'class', subType);
     }
     return vnode;
-  }
-  convertText(text: string, fontSize: number) {
-    const lines = text.split('\n');
-    if (lines.length == 1) {
-      return text;
-    } else {
-      return lines.map((line, index) => {
-        if (index === 0) {
-          return <tspan x="0">{line}</tspan>;
-        } else {
-          if (line.length == 0) {
-            // avoid tspan to be ignored if there is only a line return
-            line = ' '; //$NON-NLS-1$
-          }
-          return (
-            <tspan x="0" dy={fontSize}>
-              {line}
-            </tspan>
-          );
-        }
-      });
-    }
   }
 }
